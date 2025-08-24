@@ -1,0 +1,117 @@
+BASE:
+- ''
+DATA:
+  test:
+    adaptive: false
+    angle:
+    - 0
+    - 5
+    - 0
+    batch_size: 1
+    depth: 5
+    disable: false
+    distort: true
+    filelist: data/filelist/models_test.txt
+    flip: &id001
+    - 0.0
+    - 0.0
+    - 0.0
+    full_depth: 2
+    in_memory: false
+    interval:
+    - 1
+    - 1
+    - 1
+    jitter: 0.25
+    location: data/points
+    name: shapenet
+    num_workers: 2
+    orient_normal: xyz
+    pin_memory: true
+    scale: 0.25
+    shuffle: true
+    take: -1
+    uniform: true
+  train:
+    adaptive: false
+    angle:
+    - 0
+    - 5
+    - 0
+    batch_size: 8
+    depth: 5
+    disable: false
+    distort: true
+    filelist: data/filelist/models_train_val.txt
+    flip: *id001
+    full_depth: 2
+    in_memory: false
+    interval:
+    - 1
+    - 1
+    - 1
+    jitter: 0.25
+    location: data/points
+    name: shapenet
+    num_workers: 4
+    orient_normal: xyz
+    pin_memory: true
+    scale: 0.25
+    shuffle: true
+    take: 4471
+    uniform: true
+LOSS:
+  label_smoothing: 0.0
+  mask: -1
+  name: ''
+  num_class: 2
+MODEL:
+  channel: 4
+  feature: ND
+  find_unused_parameters: false
+  interp: linear
+  name: unet
+  nempty: false
+  nout: 2
+  stages: 3
+  sync_bn: false
+  upsample: nearest
+  use_checkpoint: false
+SOLVER:
+  alias: ''
+  best_val: max:mIoU
+  ckpt: ''
+  ckpt_num: 20
+  clip_grad: -1.0
+  empty_cache: true
+  eval_epoch: 1
+  eval_step: -1
+  gamma: 0.1
+  gpu:
+  - 0
+  log_per_iter: -1
+  logdir: logs/seg_deepmill\unet_d5/models_models/ratio_1.00
+  lr: 0.1
+  lr_min: 0.0001
+  lr_power: 0.9
+  lr_type: step
+  max_epoch: 1500
+  milestones:
+  - 750
+  - 375
+  port: 10001
+  progress_bar: true
+  rand_seed: -1
+  run: train
+  test_every_epoch: 50
+  type: sgd
+  warmup_epoch: 20
+  warmup_init: 0.001
+  weight_decay: 0.0005
+SYS:
+  cmds: python segmentation.py --config configs/seg_deepmill.yaml SOLVER.gpu 0, SOLVER.logdir
+    logs/seg_deepmill\unet_d5/models_models/ratio_1.00 SOLVER.max_epoch 1500 SOLVER.milestones
+    750,375 SOLVER.test_every_epoch 50 SOLVER.ckpt '' DATA.train.depth 5 DATA.train.filelist
+    data/filelist/models_train_val.txt DATA.train.take 4471 DATA.test.depth 5 DATA.test.filelist
+    data/filelist/models_test.txt MODEL.stages 3 MODEL.nout 2 MODEL.name unet LOSS.num_class
+    2
