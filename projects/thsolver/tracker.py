@@ -17,48 +17,53 @@ from typing import Dict, Optional
 class AverageTracker:
 
   def __init__(self):
-    self.value = dict()
-    self.num = dict()
-    self.max_len = 76
-    self.tick = time.time()
-    self.start_time = time.time()
+        # 初始化追踪器，分别用于存储各项指标的累计值和计数
+        self.value = dict()  # 存储每个指标的累计值
+        self.num = dict()    # 存储每个指标的累计次数
+        self.max_len = 76    # 最大长度（可用于显示等）
+        self.tick = time.time()      # 记录上一次更新时间
+        self.start_time = time.time()# 记录追踪器启动时间
 
   def update(self, value: Dict[str, torch.Tensor], record_time: bool = True):
-    r'''Update the tracker with the given value, which is called at the end of
-    each iteration.
-    '''
+        r'''Update the tracker with the given value, which is called at the end of
+        each iteration.
+        '''
+        # 更新追踪器，通常在每次迭代结束时调用
+        # value: 包含各项指标的字典，key为指标名，value为Tensor
+        # record_time: 是否记录本次迭代耗时
 
-    if not value:
-      return    # empty input, return
+        if not value:
+            return    # 输入为空，直接返回
 
-    # roughly record the update time
-    if record_time:
-      curr_time = time.time()
-      value['time/iter'] = torch.Tensor([curr_time - self.tick])
-      self.tick = curr_time
+        # 粗略记录本次迭代耗时
+        if record_time:
+            curr_time = time.time()
+            value['time/iter'] = torch.Tensor([curr_time - self.tick]) # 计算本次迭代耗时
+            self.tick = curr_time  # 更新时间戳
 
-    # update the value and num
-    for key, val in value.items():
-      self.value[key] = self.value.get(key, 0) + val.detach()
-      self.num[key] = self.num.get(key, 0) + 1
+        # 更新累计值和计数
+        for key, val in value.items():
+            self.value[key] = self.value.get(key, 0) + val.detach()  # 累加指标值
+            self.num[key] = self.num.get(key, 0) + 1                # 累加计数
 
   def average(self):
-    return {key: val.item() / self.num[key] for key, val in self.value.items()}
+        # 计算各项指标的平均值
+        return {key: val.item() / self.num[key] for key, val in self.value.items()}
 
   @torch.no_grad()
   def average_all_gather(self):
-    r'''Average the tensors on all GPUs using all_gather, which is called at the
-    end of each epoch.
-    '''
-
-    for key, tensor in self.value.items():
-      if not (isinstance(tensor, torch.Tensor) and tensor.is_cuda):
-        continue  # only gather tensors on GPU
-      tensors_gather = [torch.ones_like(tensor)
+        r'''Average the tensors on all GPUs using all_gather, which is called at the
+        end of each epoch.
+        '''
+        # 在多GPU环境下，使用all_gather收集所有GPU上的指标，并计算平均值
+        for key, tensor in self.value.items():
+            if not (isinstance(tensor, torch.Tensor) and tensor.is_cuda):
+                continue  # 只收集GPU上的Tensor
+            tensors_gather = [torch.ones_like(tensor)
                         for _ in range(torch.distributed.get_world_size())]
-      torch.distributed.all_gather(tensors_gather, tensor, async_op=False)
-      tensors = torch.stack(tensors_gather, dim=0)
-      self.value[key] = torch.mean(tensors)
+            torch.distributed.all_gather(tensors_gather, tensor, async_op=False)
+            tensors = torch.stack(tensors_gather, dim=0)
+            self.value[key] = torch.mean(tensors)
 
   def log(self, epoch: int, summary_writer: Optional[SummaryWriter] = None,
           log_file: Optional[str] = None, msg_tag: str = '->', notes: str = '',

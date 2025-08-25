@@ -6,8 +6,9 @@ from ocnn.octree import Octree
 import math
 
 class UNet(torch.nn.Module):
-    r''' Octree-based UNet for segmentation.
-    '''
+    """
+    UNet网络结构，支持点云分割任务，并集成刀具参数特征���
+    """
 
     def __init__(self, in_channels: int, out_channels: int, interp: str = 'linear',
                  nempty: bool = False, **kwargs):
@@ -152,26 +153,35 @@ class UNet(torch.nn.Module):
 
     def forward(self, data: torch.Tensor, octree: Octree, depth: int,
                 query_pts: torch.Tensor, tool_params: torch.Tensor):
-        r''' Forward pass with tool parameters incorporated.
+        r'''
+        前向传播函数，集成刀具参数。
+        参数：
+            data: 输入特征张量
+            octree: 八叉树结构对象
+            depth: 八叉树深度
+            query_pts: 查询点坐标
+            tool_params: 刀具参数张量
+        返回：
+            logits_1, logits_2: 两个分割头的输出
         '''
-
+        # 编码器部分，提取多尺度特征
         convd = self.unet_encoder(data, octree, depth)
 
+        # 刀具参数特征提取（每个参数通过独立的全连接层）
         tool_features_1 = self.fc_module_1(tool_params)
         tool_features_2 = self.fc_module_2(tool_params)
         tool_features_3 = self.fc_module_3(tool_params)
         tool_features_4 = self.fc_module_4(tool_params)
 
-        deconv = self.unet_decoder(convd, octree, depth - self.encoder_stages,tool_features_1,tool_features_2,tool_features_3,tool_features_4)
+        # 解码器部分，融合刀具参数特征与编码特征，进行反卷积和跳跃连接
+        deconv = self.unet_decoder(convd, octree, depth - self.encoder_stages,
+                                   tool_features_1, tool_features_2, tool_features_3, tool_features_4)
 
+        # 插值，将解码特征映射到查询点
         interp_depth = depth - self.encoder_stages + self.decoder_stages
-        # print(f"deconv shape: {deconv.shape}")
-        # print(f"octree depth: {interp_depth}, query_pts shape: {query_pts.shape}")
         feature = self.octree_interp(deconv, octree, interp_depth, query_pts)
-        # print(f"query_pts shape: {query_pts.shape}")
-        # print(f"deconv batch size: {deconv.shape[0]}")
-        # print(f"octree batch size: {octree.batch_size}")
-        # print(f"query_pts batch size: {query_pts.shape[0]}")
+
+        # 两个分割头，分别输出不同类别的分割结果
         logits_1 = self.header(feature)
         logits_2 = self.header_2(feature)
-        return logits_1,logits_2
+        return logits_1, logits_2

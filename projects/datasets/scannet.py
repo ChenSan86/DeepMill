@@ -108,35 +108,37 @@ class ScanNetTransform(Transform):
   def __call__(self, sample, idx=None):
 
     # normalize points
-    xyz = sample['points']
-    center = (xyz.min(axis=0) + xyz.max(axis=0)) / 2.0
-    center[2] = 0.5   # fix the z axis center for all scenes
-    xyz = (xyz - center) / self.scale_factor  # xyz in [-1, 1]
+    xyz = sample['points']  # 获取点云的xyz坐标
+    center = (xyz.min(axis=0) + xyz.max(axis=0)) / 2.0  # 计算点云中心
+    center[2] = 0.5   # 固定所有场景的z轴中心为0.5
+    xyz = (xyz - center) / self.scale_factor  # 坐标归一化到[-1, 1]
 
     # normalize color
-    color = sample['colors'] / 255.0
+    color = sample['colors'] / 255.0  # 颜色归一化到[0, 1]
 
     # data augmentation specific to scannet
-    if self.flags.distort:
-      color = color_distort(color, self.color_trans_ratio, self.color_jit_std)
-      xyz = elastic_distort(xyz, self.elastic_params)
+    if self.flags.distort:  # 如果开启数据增强
+      color = color_distort(color, self.color_trans_ratio, self.color_jit_std)  # 颜色扰动
+      xyz = elastic_distort(xyz, self.elastic_params)  # 空间弹性扰动
 
     # construct points
     points = Points(
-        torch.from_numpy(xyz), torch.from_numpy(sample['normals']),
-        torch.from_numpy(color), torch.from_numpy(sample['labels']).unsqueeze(1))
+        torch.from_numpy(xyz),  # xyz坐标转为torch张量
+        torch.from_numpy(sample['normals']),  # 法线转为torch张量
+        torch.from_numpy(color),  # 颜色转为torch张量
+        torch.from_numpy(sample['labels']).unsqueeze(1))  # 标签转为torch张量并升维
 
     # transform provided by `ocnn`,
     # including rotatation, translation, scaling, and flipping
-    output = self.transform({'points': points}, idx)  # points & inbox_mask
-    return output
+    output = self.transform({'points': points}, idx)  # 由ocnn提供的几何变换（旋转、平移、缩放、翻转）
+    return output  # 返回处理后的数据
 
 
 def get_scannet_dataset(flags):
-  transform = ScanNetTransform(flags)
-  read_file = ReadFile(has_normal=True, has_color=True, has_label=True)
-  collate_batch = CollateBatch()
+  transform = ScanNetTransform(flags)  # 实例化ScanNetTransform，处理点云和增强
+  read_file = ReadFile(has_normal=True, has_color=True, has_label=True)  # ��取点云、法线、颜色、标签
+  collate_batch = CollateBatch()  # 批量数据整理器
 
   dataset = Dataset(flags.location, flags.filelist, transform,
-                    read_file=read_file)
-  return dataset, collate_batch
+                    read_file=read_file)  # 构建数据集对象
+  return dataset, collate_batch  # 返回数据集和批处理器
