@@ -22,6 +22,7 @@ class ReadPly:
 
   def __call__(self, filename: str):
     # 读取PLY文件，返回包含点云、法线、颜色、标签等信息的字典
+    #TODO change plyData.read
     plydata = PlyData.read(filename)  # 读取PLY文件
     vtx = plydata['vertex']           # 获取顶点数据
 
@@ -36,6 +37,7 @@ class ReadPly:
       # 如果需要颜色，则读取颜色信息
       color = np.stack([vtx['red'], vtx['green'], vtx['blue']], axis=1)
       output['colors'] = color.astype(np.float32)
+      #TODO这里不读点云的label
     if self.has_label:
       # 如果需要标签，则读取标签信息
       label = vtx['label']
@@ -43,8 +45,25 @@ class ReadPly:
     # 额外读取label_2标签
     label_2 = vtx['label_2']
     output['labels_2'] = label_2.astype(np.int32)
-    return output
 
+    return output
+'''{'points': array([[ 0.672988,  0.559063,  0.217631],
+       [ 0.676972,  0.559063,  0.171064],
+       [ 0.631089,  0.559063,  0.187243],
+       ...,
+       [-0.605871, -0.387205, -0.008516],
+       [ 0.05419 ,  0.559063, -0.296479],
+       [-0.247331,  0.559063, -0.364745]], dtype=float32), 
+       'normals': array([[ 0.      ,  1.      ,  0.      ],
+       [ 0.      ,  1.      ,  0.      ],
+       [ 0.      ,  1.      ,  0.      ],
+       ...,
+       [-0.999873,  0.001302,  0.015914],
+       [ 0.      ,  1.      ,  0.      ],
+       [ 0.      ,  1.      ,  0.      ]], 
+       dtype=float32), 'labels': memmap([1, 1, 1, ..., 0, 1, 1]), 
+       'labels_2': memmap([0, 0, 0, ..., 0, 0, 0])}
+       '''
 
 # ReadNpz类用于读取npz格式的点云数据文件，参数同ReadPly
 class ReadNpz:

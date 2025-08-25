@@ -33,13 +33,13 @@ ssl._create_default_https_context = ssl._create_unverified_context
 # 获取当前文件的上一级目录的绝对路径
 abs_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 # 定义数据根目录
-root_folder = os.path.join(abs_path, 'data')
+root_folder = os.path.join(abs_path, 'data')#data/
 # 定义原始数据压缩包名称
 zip_name = 'raw_data'
 # 定义原始数据txt文件夹路径
-txt_folder = os.path.join(root_folder, zip_name)
+txt_folder = os.path.join(root_folder, zip_name)#data/raw_data
 # 定义点云数据文件夹路径
-ply_folder = os.path.join(root_folder, 'points')
+ply_folder = os.path.join(root_folder, 'points')#data/raw_data/points
 
 # 定义类别列表
 categories = ['models']
@@ -160,6 +160,7 @@ def generate_filelist():
         four_numbers = cutter_data[:4]  # 获取前四个数字
 
       # 文件条目格式：<ply文件名> <类别索引> <四个数字>
+      #TODO 在这里加入标签<ply文件名> <类别索引> <四个数字> <六个数字>
       file_entry = '%s %d %.6f %.6f %.6f %.6f' % (ply_filename, i, *four_numbers)
 
       # 按照比例将文件分配到训练和验证集或测试集中

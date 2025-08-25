@@ -160,4 +160,36 @@ class CollateBatch:
       if 'label_2' in key:
         outputs['label_2'] = torch.tensor(outputs[key])
 
+    print("\n"*10)
+    print(outputs)
+    print("\n"*10)
+
     return outputs
+'''{'points': <ocnn.octree.points.Points object at 0x00000158DA2AD750>,
+ 'inbox_mask': [tensor([True, True, True,  ..., True, True, True]),
+ tensor([False, False, False,  ...,  True,  True,  True]),
+ tensor([True, True, True,  ..., True, True, True]),
+ tensor([True, True, True,   ..., True, True, True]), 
+tensor([True, True, True,  ..., True, True, True]), 
+  tensor([True, True, True,  ..., True, True, True]), 
+  tensor([True, True, True,  ..., True, True, True]), 
+  tensor([True, True, True,  ..., True, True, True])], 
+  'octree': <ocnn.octree.octree.Octre
+e object at 0x00000158DA2AE080>, 
+'label': tensor([0, 0, 0, 0, 0, 0, 0, 0]),
+ 'filename': ['models/00185844_14f3d01d62b5237f728896c5_trimesh_076_collision_detection.ply', 
+ 'models/00180686_ea6367c8a224ad6fdf4fb34b_trimesh_013_collision_detection.ply', 
+ 'models/00186429_9d497b2fa29b87491f08ef85_trimesh_003_collision_detection.ply', 
+'models/00186448_19a4b1099ec6cf2b78a62985_trimesh_000_collision_detection.ply', 
+'models/00180129_2a7cd9e552c6cea9a96c9b19_trimesh_005_collision_detection.ply', 
+'models/00186294_57720c19e4b0b4b404503992_trimesh_001_collision_detection.ply',
+ 'models/00186536_35fd82bd6c05f33776aa5852_trimesh_021_collision_detection.ply',
+  'models/00183156_e4dfafb620a34b2168d7e04a_trimesh_001_collision_detection.ply'], 
+  'tool_params': [['1.859530', '4.404930', '94.149500', '5.689460'],
+   ['1.528950', '5.992420', '60.097500', '5.337980'], 
+   ['1.022710', '8.981910', '54.232700', '2.376390'], 
+   ['1.908020', '4.877120', '19.339000', '0.614663'], 
+   ['1.969010', '4.070060', '96.976400', '0.958661'], 
+   ['1.838680', '6.335170', '52.698200', '9.206030'], 
+   ['1.295500', '0.211525', '42.697500', '0.987759'], 
+['1.143460', '10.010300', '53.347800', '4.771190']]}'''

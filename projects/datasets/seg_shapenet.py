@@ -61,8 +61,10 @@ def load_tool_params(filename, tool_params_dir):
 
 def get_seg_shapenet_dataset(flags):
   transform = ShapeNetTransform(flags)
+  #TODO: 修改labels的读取方式
   read_ply = ReadPly(has_normal=True, has_label=True)
   collate_batch = CollateBatch(merge_points=True)
+
 
   # 创建数据集
   dataset = Dataset(flags.location, flags.filelist, transform,
@@ -73,5 +75,6 @@ def get_seg_shapenet_dataset(flags):
   #   filename = item['filename']  # 获取当前样本的文件名
   #   tool_params = load_tool_params(filename, tool_params_dir)  # 加载刀具参数
   #   item['tool_params'] = tool_params  # 将刀具参数添加到数��项中
+
 
   return dataset, collate_batch

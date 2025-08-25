@@ -28,14 +28,16 @@ class SegSolver(Solver):  # 继承自Solver，分割任务专用训练器
         if flags.name.lower() == 'segnet':  # 如果模型名为segnet
             model = ocnn.models.SegNet(
                 flags.channel, flags.nout, flags.stages, flags.interp, flags.nempty)  # 构建SegNet模型
+#TODO ======================================================================================
         elif flags.name.lower() == 'unet':  # 如果模型名为unet
             model = ocnn.models.UNet(
                 flags.channel, flags.nout, flags.interp, flags.nempty)  # 构建UNet模型
         else:
             raise ValueError  # 未知模型名抛出异常
         return model  # 返回模型对象
-
+#TODO ======================================================================================
     def get_dataset(self, flags):  # 根据配置返回数据集和collate函数
+        #TODO ==================================================================================
         if flags.name.lower() == 'shapenet':  # ShapeNet分割数据集
             return get_seg_shapenet_dataset(flags)
         elif flags.name.lower() == 'scannet':  # ScanNet分割数据集
@@ -142,6 +144,7 @@ class SegSolver(Solver):  # 继承自Solver，分割任务专用训练器
     def train_step(self, batch):  # 训练步骤
         batch = self.process_batch(batch, self.FLAGS.DATA.train)  # 处理训练数据
         logit_1,logit_2, label, label_2 = self.model_forward(batch)  # 前向传播
+        #TODO loss使用6->3*3 后使用L2矩阵差平方和（Frobenius norm 的平方）
         loss_1 = self.loss_function(logit_1, label)  # 计算损失
         loss_2 = self.loss_function(logit_2, label_2)  # 计算损失
         loss = (loss_1 + loss_2)/2  # 平均损失
@@ -152,6 +155,7 @@ class SegSolver(Solver):  # 继承自Solver，分割任务专用训练器
         pred_1 = logit_1.argmax(dim=-1)  # 假设 logit_1 是 logits 形式，需要用 argmax 选取预测类别
         pred_2 = logit_2.argmax(dim=-1)
         # 这里使用 f1_score 函数，假设 label 和 label_2 都是 0 和 1 的整数标签
+        #TODO 测地距离（geodesic error） 衡量旋转误差 ；平均误差、最大误差、标准差，并画出误差分布百分位曲线。
         f1_score_1 = f1_score(label.cpu().numpy(), pred_1.cpu().numpy(), average='binary')  # 计算F1分数
         f1_score_2 = f1_score(label_2.cpu().numpy(), pred_2.cpu().numpy(), average='binary')  # 计算F1分数
         f1_score_avg = (f1_score_1 + f1_score_2) / 2  # 平均F1分数
