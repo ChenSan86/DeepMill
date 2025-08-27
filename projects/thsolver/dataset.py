@@ -29,7 +29,6 @@ class Dataset(torch.utils.data.Dataset):
     self.read_file = read_file
     self.take = take  # 训练/测试时选取的样本数量
 
-    #TODO 这里的label不是label
     self.filenames, self.labels, self.tool_params= self.load_filenames()  # 加载文件名、标签和刀具参数
     if self.in_memory:
       print('Load files into memory from ' + self.filelist)  # 打印加载信息

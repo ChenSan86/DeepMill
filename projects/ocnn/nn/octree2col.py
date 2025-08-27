@@ -17,7 +17,7 @@ def octree2col(data: torch.Tensor, octree: Octree, depth: int,
   r''' Gathers the neighboring features for convolutions.
 
   Args:
-    data (torch.Tensor): The input data.
+    data (torch.Tensor): The data_ data_2.0.
     octree (Octree): The corresponding octree.
     depth (int): The depth of current octree.
     kernel_size (str): The kernel shape, choose from :obj:`333`, :obj:`311`, 

@@ -47,7 +47,7 @@ class Points:
     self.check_input()
 
   def check_input(self):
-    r''' Checks the input arguments.
+    r''' Checks the data_ arguments.
     '''
 
     assert self.points.dim() == 2 and self.points.size(1) == 3

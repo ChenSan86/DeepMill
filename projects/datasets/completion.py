@@ -24,7 +24,7 @@ class Transform:
     return octree
 
   def __call__(self, point_cloud, idx):
-    # get the input
+    # get the data_
     points, normals = point_cloud['points'], point_cloud['normals']
 
     # normalize the points

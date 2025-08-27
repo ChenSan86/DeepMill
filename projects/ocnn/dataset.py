@@ -16,15 +16,15 @@ classes = __all__
 
 
 class Transform:
-  r''' A boilerplate class which transforms an input data for :obj:`ocnn`.
-  The input data is first converted to :class:`Points`, then randomly transformed
+  r''' A boilerplate class which transforms an data_ data_2.0 for :obj:`ocnn`.
+  The data_ data_2.0 is first converted to :class:`Points`, then randomly transformed
   (if enabled), and converted to an :class:`Octree`.
 
   Args:
     depth (int): The octree depth.
     full_depth (int): The octree layers with a depth small than
         :attr:`full_depth` are forced to be full.
-    distort (bool): If true, performs the data augmentation.
+    distort (bool): If true, performs the data_2.0 augmentation.
     angle (list): A list of 3 float values to generate random rotation angles.
     interval (list): A list of 3 float values to represent the interval of
         rotation angles.
@@ -44,7 +44,7 @@ class Transform:
     self.depth = depth
     self.full_depth = full_depth
 
-    # for data augmentation
+    # for data_2.0 augmentation
     self.distort = distort
     self.angle = angle
     self.interval = interval
@@ -96,7 +96,7 @@ class Transform:
     return sample
 
   def points2octree(self, points: Points):
-    r''' Converts the input :attr:`points` to an octree.
+    r''' Converts the data_ :attr:`points` to an octree.
     '''
 
     octree = Octree(self.depth, self.full_depth)
@@ -104,7 +104,7 @@ class Transform:
     return octree
 
   def rnd_parameters(self):
-    r''' Generates random parameters for data augmentation.
+    r''' Generates random parameters for data_2.0 augmentation.
     '''
 
     rnd_angle = [None] * 3
@@ -160,9 +160,9 @@ class CollateBatch:
       if 'label_2' in key:
         outputs['label_2'] = torch.tensor(outputs[key])
 
-    print("\n"*10)
-    print(outputs)
-    print("\n"*10)
+    # print("\n"*10)
+    # print(outputs)
+    # print("\n"*10)
 
     return outputs
 '''{'points': <ocnn.octree.points.Points object at 0x00000158DA2AD750>,

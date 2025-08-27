@@ -48,10 +48,10 @@ class OctreeConvBase:
     '''
 
     # The depth of tensors:
-    # The in_depth and out_depth are the octree depth of the input and output
-    # data; neigh_depth is the octree depth of the neighborhood information, as
-    # well as `col` data, neigh_depth is always the same as the depth of larger
-    # data when doing octree2col or col2octree.
+    # The in_depth and out_depth are the octree depth of the data_ and output
+    # data_2.0; neigh_depth is the octree depth of the neighborhood information, as
+    # well as `col` data_2.0, neigh_depth is always the same as the depth of larger
+    # data_2.0 when doing octree2col or col2octree.
     self.in_depth = depth
     self.out_depth = depth
     self.neigh_depth = depth
@@ -93,14 +93,14 @@ class OctreeConvBase:
     self.buffer_shape = (self.buffer_h, self.kdim, self.in_conv)
 
   def check_and_init(self, data: torch.Tensor):
-    r''' Checks the input data and initializes the shape of output data.
+    r''' Checks the data_ data_2.0 and initializes the shape of output data_2.0.
     '''
 
-    # Check the shape of input data
+    # Check the shape of data_ data_2.0
     check = tuple(data.shape) == self.in_shape
-    assert check, 'The shape of input data is wrong.'
+    assert check, 'The shape of data_ data_2.0 is wrong.'
 
-    # Init the output data
+    # Init the output data_2.0
     out = data.new_zeros(self.out_shape)
     return out
 
@@ -310,7 +310,7 @@ class OctreeConv(OctreeConvBase, torch.nn.Module):
   r''' Performs octree convolution.
 
   Args:
-    in_channels (int): Number of input channels.
+    in_channels (int): Number of data_ channels.
     out_channels (int): Number of output channels.
     kernel_size (List(int)): The kernel shape, choose from :obj:`[3]`, :obj:`[2]`,
         :obj:`[3,3,3]`, :obj:`[3,1,1]`, :obj:`[1,3,1]`, :obj:`[1,1,3]`,
@@ -362,7 +362,7 @@ class OctreeConv(OctreeConvBase, torch.nn.Module):
     r''' Defines the octree convolution.
 
     Args:
-      data (torch.Tensor): The input data.
+      data (torch.Tensor): The data_ data_2.0.
       octree (Octree): The corresponding octree.
       depth (int): The depth of current octree.
     '''

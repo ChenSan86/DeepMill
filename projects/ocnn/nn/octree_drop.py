@@ -17,7 +17,7 @@ class OctreeDropPath(torch.nn.Module):
 
   Args:
     drop_prob (int): The probability of drop paths.
-    nempty (bool): Indicate whether the input data only contains features of the
+    nempty (bool): Indicate whether the data_ data_2.0 only contains features of the
         non-empty octree nodes or not.
     scale_by_keep (bool): Whether to scale the kept features proportionally.
   '''

@@ -14,7 +14,7 @@ def search_value(value: torch.Tensor, key: torch.Tensor, query: torch.Tensor):
   r''' Searches values according to sorted shuffled keys.
 
   Args:
-    value (torch.Tensor): The input tensor with shape (N, C).
+    value (torch.Tensor): The data_ tensor with shape (N, C).
     key (torch.Tensor): The key tensor corresponds to :attr:`value` with shape 
         (N,), which contains sorted shuffled keys of an octree.
     query (torch.Tensor): The query tensor, which also contains shuffled keys.
@@ -37,7 +37,7 @@ def search_value(value: torch.Tensor, key: torch.Tensor, query: torch.Tensor):
 
 def octree_align(value: torch.Tensor, octree: Octree, octree_query: Octree,
                  depth: int, nempty: bool = False):
-  r''' Wraps :func:`octree_align` to take octrees as input for convenience.
+  r''' Wraps :func:`octree_align` to take octrees as data_ for convenience.
   '''
 
   key = octree.key(depth, nempty)

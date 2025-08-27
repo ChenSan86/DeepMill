@@ -28,8 +28,17 @@ class ShapeNetTransform(Transform):
         """
         xyz = torch.from_numpy(sample['points']).float()  # 点云坐标
         normal = torch.from_numpy(sample['normals']).float()  # 法线
+
+
+
+
         labels = torch.from_numpy(sample['labels']).float()  # 主标签
-        labels_2 = torch.from_numpy(sample['labels_2']).float()  # 辅助标签
+
+
+
+
+
+        # labels_2 = torch.from_numpy(sample['labels_2']).float()  # 辅助标签
         # 封装为 Points 对象，labels/labels_2 需升维以适配 Points 接口
         points = Points(xyz, normal, labels=labels.unsqueeze(1), labels_2=labels_2.unsqueeze(1))
 

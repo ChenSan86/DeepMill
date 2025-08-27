@@ -67,8 +67,8 @@ _C.DATA.train.adaptive      = False       # Build the adaptive octree
 # For transformation
 _C.DATA.train.orient_normal = ''          # Used to re-orient normal directions
 
-# For data augmentation
-_C.DATA.train.distort       = False       # Whether to apply data augmentation
+# For data_2.0 augmentation
+_C.DATA.train.distort       = False       # Whether to apply data_2.0 augmentation
 _C.DATA.train.scale         = 0.0         # Scale the points
 _C.DATA.train.uniform       = False       # Generate uniform scales
 _C.DATA.train.jitter        = 0.0         # Jitter the points
@@ -77,14 +77,14 @@ _C.DATA.train.angle         = (180, 180, 180)
 _C.DATA.train.flip          = (0.0, 0.0, 0.0)
 
 
-# For data loading
-_C.DATA.train.location      = ''          # The data location
-_C.DATA.train.filelist      = ''          # The data filelist
-_C.DATA.train.batch_size    = 32          # Training data batch size
+# For data_2.0 loading
+_C.DATA.train.location      = ''          # The data_2.0 location
+_C.DATA.train.filelist      = ''          # The data_2.0 filelist
+_C.DATA.train.batch_size    = 32          # Training data_2.0 batch size
 _C.DATA.train.take          = -1          # Number of samples used for training
-_C.DATA.train.num_workers   = 4           # Number of workers to load the data
-_C.DATA.train.shuffle       = False       # Shuffle the input data
-_C.DATA.train.in_memory     = False       # Load the training data into memory
+_C.DATA.train.num_workers   = 4           # Number of workers to load the data_2.0
+_C.DATA.train.shuffle       = False       # Shuffle the data_ data_2.0
+_C.DATA.train.in_memory     = False       # Load the training data_2.0 into memory
 
 
 _C.DATA.test = _C.DATA.train.clone()
@@ -93,8 +93,8 @@ _C.DATA.test.num_workers    = 2
 # MODEL related parameters
 _C.MODEL = CN(new_allowed=True)
 _C.MODEL.name               = ''          # The name of the model
-_C.MODEL.feature            = 'ND'        # The input features
-_C.MODEL.channel            = 3           # The input feature channel
+_C.MODEL.feature            = 'ND'        # The data_ features
+_C.MODEL.channel            = 3           # The data_ feature channel
 _C.MODEL.nempty             = False       # Perform Octree Conv on non-empty octree nodes
 
 _C.MODEL.sync_bn            = False       # Use sync_bn when training the network

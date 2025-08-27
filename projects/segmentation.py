@@ -171,7 +171,7 @@ class SegSolver(Solver):  # 继承自Solver，分割任务专用训练器
         batch = self.process_batch(batch, self.FLAGS.DATA.test)  # 处理测试数据
         with torch.no_grad():
             logit_1,logit_2, label, label_2 = self.model_forward(batch)  # 前向传播
-        # self.visualization(batch['points'], logit, label, ".\\data\\vis\\"+batch['filename'][0][:-4]+".obj") #FC:目前可视化只支持test的batch size=1
+        # self.visualization(batch['points'], logit, label, ".\\data_2.0\\vis\\"+batch['filename'][0][:-4]+".obj") #FC:目前可视化只支持test的batch size=1
         loss_1 = self.loss_function(logit_1, label)  # 计算损失
         loss_2 = self.loss_function(logit_2, label_2)  # 计算损失
         loss = (loss_1 + loss_2) / 2  # 平均损失
@@ -235,7 +235,7 @@ class SegSolver(Solver):  # 继承自Solver，分割任务专用训练器
         # merge predictions
         batch_size = len(inbox_masks)  # 批次大小
         for i in range(batch_size):
-            # The point cloud may be clipped when doing data augmentation. The
+            # The point cloud may be clipped when doing data_2.0 augmentation. The
             # `inbox_mask` indicates which points are clipped. The `prob_all_pts`
             # contains the prediction for all points.
             prob = probs[i].cpu()  # 获取CPU上的概率

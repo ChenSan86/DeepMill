@@ -30,7 +30,7 @@ DATA:
     # transformation
     orient_normal: xyz
 
-    # data augmentations
+    # data_2.0 augmentations
     distort: True
     angle: (0, 5, 0)
     interval: (1, 1, 1)
@@ -38,9 +38,9 @@ DATA:
     jitter: 0.25
     uniform: True
 
-    # data loading
-    location: data/points
-    filelist: data/filelist/10_train_val.txt
+    # data_2.0 loading
+    location: data_2.0/points
+    filelist: data_2.0/filelist/10_train_val.txt
     batch_size: 8
     shuffle: True
     # num_workers: 0
@@ -55,17 +55,17 @@ DATA:
     # transformation
     orient_normal: xyz
 
-    # data augmentations
-    distort: True   # False -> no data augmentation
+    # data_2.0 augmentations
+    distort: True   # False -> no data_2.0 augmentation
     angle: (0, 5, 0)
     interval: (1, 1, 1)
     scale: 0.25
     jitter: 0.25
     uniform: True
 
-    # data loading
-    location: data/points
-    filelist: data/filelist/10_test.txt
+    # data_2.0 loading
+    location: data_2.0/points
+    filelist: data_2.0/filelist/10_test.txt
     batch_size: 1
     shuffle: True
     # num_workers: 0

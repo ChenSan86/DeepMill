@@ -11,11 +11,11 @@ from ocnn.octree import Octree
 
 
 def octree_pad(data: torch.Tensor, octree: Octree, depth: int, val: float = 0.0):
-  r''' Pads :attr:`val` to make the number of elements of :attr:`data` equal to
+  r''' Pads :attr:`val` to make the number of elements of :attr:`data_2.0` equal to
   the octree node number.
 
   Args:
-    data (torch.Tensor): The input tensor with its number of elements equal to the
+    data (torch.Tensor): The data_ tensor with its number of elements equal to the
         non-empty octree node number.
     octree (Octree): The corresponding octree.
     depth (int): The depth of current octree.

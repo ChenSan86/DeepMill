@@ -16,15 +16,15 @@ from ocnn.octree import Octree
 def octree_nearest_pts(data: torch.Tensor, octree: Octree, depth: int,
                        pts: torch.Tensor, nempty: bool = False,
                        bound_check: bool = False):
-  ''' The nearest-neighbor interpolatation with input points.
+  ''' The nearest-neighbor interpolatation with data_ points.
 
   Args:
-    data (torch.Tensor): The input data.
+    data (torch.Tensor): The data_ data_2.0.
     octree (Octree): The octree to interpolate.
-    depth (int): The depth of the data.
+    depth (int): The depth of the data_2.0.
     pts (torch.Tensor): The coordinates of the points with shape :obj:`(N, 4)`,
         i.e. :obj:`N x (x, y, z, batch)`.
-    nempty (bool): If true, the :attr:`data` only contains features of non-empty 
+    nempty (bool): If true, the :attr:`data_2.0` only contains features of non-empty
         octree nodes
     bound_check (bool): If true, check whether the point is in :obj:`[0, 2^depth)`.
 
@@ -33,7 +33,7 @@ def octree_nearest_pts(data: torch.Tensor, octree: Octree, depth: int,
   '''
 
   nnum = octree.nnum_nempty[depth] if nempty else octree.nnum[depth]
-  assert data.shape[0] == nnum, 'The shape of input data is wrong.'
+  assert data.shape[0] == nnum, 'The shape of data_ data_2.0 is wrong.'
 
   idx = octree.search_xyzb(pts, depth, nempty)
   valid = idx > -1   # valid indices
@@ -50,13 +50,13 @@ def octree_nearest_pts(data: torch.Tensor, octree: Octree, depth: int,
 def octree_linear_pts(data: torch.Tensor, octree: Octree, depth: int,
                       pts: torch.Tensor, nempty: bool = False,
                       bound_check: bool = False):
-  ''' Linear interpolatation with input points.
+  ''' Linear interpolatation with data_ points.
 
   Refer to :func:`octree_nearest_pts` for the meaning of the arguments.
   '''
 
   nnum = octree.nnum_nempty[depth] if nempty else octree.nnum[depth]
-  assert data.shape[0] == nnum, 'The shape of input data is wrong.'
+  assert data.shape[0] == nnum, 'The shape of data_ data_2.0 is wrong.'
 
   device = data.device
   grid = torch.tensor(
@@ -139,15 +139,15 @@ def octree_nearest_upsample(data: torch.Tensor, octree: Octree, depth: int,
   with the nearest-neighbor interpolation.
 
   Args:
-    data (torch.Tensor): The input data.
+    data (torch.Tensor): The data_ data_2.0.
     octree (Octree): The octree to interpolate.
-    depth (int): The depth of the data.
-    nempty (bool): If true, the :attr:`data` only contains features of non-empty 
+    depth (int): The depth of the data_2.0.
+    nempty (bool): If true, the :attr:`data_2.0` only contains features of non-empty
         octree nodes.
   '''
 
   nnum = octree.nnum_nempty[depth] if nempty else octree.nnum[depth]
-  assert data.shape[0] == nnum, 'The shape of input data is wrong.'
+  assert data.shape[0] == nnum, 'The shape of data_ data_2.0 is wrong.'
 
   out = data
   if not nempty:

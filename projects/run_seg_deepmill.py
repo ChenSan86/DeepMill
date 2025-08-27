@@ -31,7 +31,7 @@ ratios = args.ratios  # 获取数据比例列表
 module = 'segmentation.py'  # 主训练脚本名
 script = 'python %s --config configs/seg_deepmill.yaml' % module  # 构建训练命令
 
-data = 'data'  # 数据目录
+data = 'data_2.0'  # 数据目录
 logdir = 'logs/seg_deepmill'  # 日志目录
 
 categories = ['models']  # 类别列表

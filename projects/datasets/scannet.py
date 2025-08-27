@@ -96,9 +96,9 @@ class ScanNetTransform(Transform):
   def __init__(self, flags):
     super().__init__(flags)
 
-    # The `self.scale_factor` is used to normalize the input point cloud to the
+    # The `self.scale_factor` is used to normalize the data_ point cloud to the
     # range of [-1, 1]. If this parameter is modified, the `self.elastic_params`
-    # and the `jittor` in the data augmentation should be scaled accordingly.
+    # and the `jittor` in the data_2.0 augmentation should be scaled accordingly.
     # self.scale_factor = 5.12    # depth 9: voxel size 2cm
     self.scale_factor = 10.24     # depth 10: voxel size 2cm; depth 11: voxel size 1cm
     self.color_trans_ratio = 0.10
@@ -116,7 +116,7 @@ class ScanNetTransform(Transform):
     # normalize color
     color = sample['colors'] / 255.0  # 颜色归一化到[0, 1]
 
-    # data augmentation specific to scannet
+    # data_2.0 augmentation specific to scannet
     if self.flags.distort:  # 如果开启数据增强
       color = color_distort(color, self.color_trans_ratio, self.color_jit_std)  # 颜色扰动
       xyz = elastic_distort(xyz, self.elastic_params)  # 空间弹性扰动

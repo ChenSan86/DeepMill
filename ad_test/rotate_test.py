@@ -109,7 +109,7 @@ def batch_rotmat_to_6d_txt_multithread(root_folder, max_workers=8):
 if __name__ == "__main__":
     # 命令行参数解析，支持自定义root_folder
     parser = argparse.ArgumentParser(description="批量旋转矩阵转6D表示（多线程加速版）")
-    parser.add_argument('--root_folder', type=str, default="F:\\orign",
+    parser.add_argument('--root_folder', type=str, default="F:\\keep",
                         help='顶层数据文件夹路径，默认为当前脚本所在目录')
     parser.add_argument('--max_workers', type=int, default=8, help='最大线程数，默认8')
     args = parser.parse_args()

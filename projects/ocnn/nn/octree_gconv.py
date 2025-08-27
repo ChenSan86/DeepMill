@@ -17,7 +17,7 @@ class OctreeGroupConv(torch.nn.Module):
   r''' Performs octree-based group convolution.
 
   Args:
-    in_channels (int): Number of input channels.
+    in_channels (int): Number of data_ channels.
     out_channels (int): Number of output channels.
     kernel_size (List(int)): The kernel shape, choose from :obj:`[3]`, :obj:`[2]`,
         :obj:`[3,3,3]`, :obj:`[3,1,1]`, :obj:`[1,3,1]`, :obj:`[1,1,3]`,
@@ -56,7 +56,7 @@ class OctreeGroupConv(torch.nn.Module):
     r''' Defines the octree-based group convolution.
 
     Args:
-      data (torch.Tensor): The input data.
+      data (torch.Tensor): The data_ data_2.0.
       octree (Octree): The corresponding octree.
       depth (int): The depth of current octree.
     '''

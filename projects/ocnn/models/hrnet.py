@@ -140,7 +140,7 @@ class ClsHeader(torch.nn.Module):
   def forward(self, data: List[torch.Tensor], octree: Octree, depth: int):
     full_depth = 2
     num = len(data)
-    outs = [x for x in data]  # avoid modifying the input data
+    outs = [x for x in data]  # avoid modifying the data_ data_2.0
     for i in range(num):
       depth_i = depth - i
       for d in range(depth_i, full_depth, -1):
@@ -181,7 +181,7 @@ class HRNet(torch.nn.Module):
   def forward(self, data: torch.Tensor, octree: Octree, depth: int):
     r''''''
     convs = [self.front(data, octree, depth)]
-    depth = depth - 1  # the data is downsampled in `front`
+    depth = depth - 1  # the data_2.0 is downsampled in `front`
     for i in range(self.stages):
       convs = self.branches[i](convs, octree, depth)
       if i < self.stages - 1:

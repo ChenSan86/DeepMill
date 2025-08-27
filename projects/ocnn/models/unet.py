@@ -156,7 +156,7 @@ class UNet(torch.nn.Module):
         r'''
         前向传播函数，集成刀具参数。
         参数：
-            data: 输入特征张量
+            data_2.0: 输入特征张量
             octree: 八叉树结构对象
             depth: 八叉树深度
             query_pts: 查询点坐标

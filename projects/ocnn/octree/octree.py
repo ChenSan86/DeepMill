@@ -16,7 +16,7 @@ from ocnn.utils import range_grid, scatter_add, cumsum, trunc_div
 
 
 class Octree:
-  r''' Builds an octree from an input point cloud.
+  r''' Builds an octree from an data_ point cloud.
 
   Args:
     depth (int): The octree depth.
@@ -27,7 +27,7 @@ class Octree:
         (default: :obj:`cpu`)
 
   .. note::
-    The octree data structure requires that if an octree node has children nodes,
+    The octree data_2.0 structure requires that if an octree node has children nodes,
     the number of children nodes is exactly 8, in which some of the nodes are
     empty and some nodes are non-empty. The properties of an octree, including
     :obj:`keys`, :obj:`children` and :obj:`neighs`, contain both non-empty and
@@ -150,7 +150,7 @@ class Octree:
     r''' Builds an octree from a point cloud.
 
     Args:
-      point_cloud (Points): The input point cloud.
+      point_cloud (Points): The data_ point cloud.
 
     .. note::
       Currently, the batch size of the point cloud must be 1.
@@ -259,7 +259,7 @@ class Octree:
     r''' Sets whether the octree nodes in :attr:`depth` are splitted or not.
 
     Args:
-      split (torch.Tensor): The input tensor with its element indicating status
+      split (torch.Tensor): The data_ tensor with its element indicating status
           of each octree node: 0 - empty, 1 - non-empty or splitted.
       depth (int): The depth of current octree.
     '''
@@ -451,11 +451,11 @@ class Octree:
       raise ValueError('Unsupported kernel {}'.format(kernel))
 
   def get_input_feature(self, feature: str, nempty: bool = False):
-    r''' Returns the initial input feature stored in octree.
+    r''' Returns the initial data_ feature stored in octree.
 
     Args:
       feature (str): A string used to indicate which features to extract from
-          the input octree. If the character :obj:`N` is in :attr:`feature`, the
+          the data_ octree. If the character :obj:`N` is in :attr:`feature`, the
           normal signal is extracted (3 channels). Similarly, if :obj:`D` is in
           :attr:`feature`, the local displacement is extracted (1 channels). If
           :obj:`L` is in :attr:`feature`, the local coordinates of the averaged
@@ -506,7 +506,7 @@ class Octree:
     batch_size = self.batch_size
 
     # by default, use the average points generated when building the octree
-    # from the input point cloud
+    # from the data_ point cloud
     xyz = self.points[depth]
     batch_id = self.batch_id(depth, nempty=True)
 

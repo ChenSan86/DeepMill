@@ -19,11 +19,11 @@ def octree_max_pool(data: torch.Tensor, octree: Octree, depth: int,
   r''' Performs octree max pooling with kernel size 2 and stride 2.
 
   Args:
-    data (torch.Tensor): The input tensor.
+    data (torch.Tensor): The data_ tensor.
     octree (Octree): The corresponding octree.
     depth (int): The depth of current octree. After pooling, the corresponding
         depth decreased by 1.
-    nempty (bool): If True, :attr:`data` contains only features of non-empty
+    nempty (bool): If True, :attr:`data_2.0` contains only features of non-empty
         octree nodes.
     return_indices (bool): If True, returns the indices, which can be used in
         :func:`octree_max_unpool`.
@@ -43,11 +43,11 @@ def octree_max_unpool(data: torch.Tensor, indices: torch.Tensor, octree: Octree,
   r''' Performs octree max unpooling.
 
   Args:
-    data (torch.Tensor): The input tensor.
+    data (torch.Tensor): The data_ tensor.
     indices (torch.Tensor): The indices returned by :func:`octree_max_pool`. The
-        depth of :attr:`indices` is larger by 1 than :attr:`data`.
+        depth of :attr:`indices` is larger by 1 than :attr:`data_2.0`.
     octree (Octree): The corresponding octree.
-    depth (int): The depth of current data. After unpooling, the corresponding
+    depth (int): The depth of current data_2.0. After unpooling, the corresponding
         depth increases by 1.
   '''
 
@@ -70,12 +70,12 @@ def octree_avg_pool(data: torch.Tensor, octree: Octree, depth: int,
   r''' Performs octree average pooling.
 
   Args:
-    data (torch.Tensor): The input tensor.
+    data (torch.Tensor): The data_ tensor.
     octree (Octree): The corresponding octree.
     depth (int): The depth of current octree.
     kernel (str): The kernel size, like '333', '222'.
     stride (int): The stride of the pooling.
-    nempty (bool): If True, :attr:`data` contains only features of non-empty
+    nempty (bool): If True, :attr:`data_2.0` contains only features of non-empty
         octree nodes.
   '''
 
@@ -106,10 +106,10 @@ def octree_global_pool(data: torch.Tensor, octree: Octree, depth: int,
   r''' Performs octree global average pooling.
 
   Args:
-    data (torch.Tensor): The input tensor.
+    data (torch.Tensor): The data_ tensor.
     octree (Octree): The corresponding octree.
     depth (int): The depth of current octree.
-    nempty (bool): If True, :attr:`data` contains only features of non-empty
+    nempty (bool): If True, :attr:`data_2.0` contains only features of non-empty
         octree nodes.
   '''
 

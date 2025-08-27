@@ -284,7 +284,7 @@ class Conv1x1GnRelu(torch.nn.Module):
 
 
 class InputFeature(torch.nn.Module):
-  r''' Returns the initial input feature stored in octree.
+  r''' Returns the initial data_ feature stored in octree.
 
   Refer to :func:`ocnn.octree.Octree.get_input_feature` for details.
   '''

@@ -75,14 +75,14 @@ def range_grid(min: int, max: int, device: torch.device = 'cpu'):
 
 
 def cumsum(data: torch.Tensor, dim: int, exclusive: bool = False):
-  r''' Extends :func:`torch.cumsum` with the input argument :attr:`exclusive`.
+  r''' Extends :func:`torch.cumsum` with the data_ argument :attr:`exclusive`.
 
   Args:
-    data (torch.Tensor): The input data.
+    data (torch.Tensor): The data_ data_2.0.
     dim (int): The dimension to do the operation over.
     exclusive (bool): If false, the behavior is the same as :func:`torch.cumsum`;
         if true, returns the cumulative sum exclusively. Note that if ture,
-        the shape of output tensor is larger by 1 than :attr:`data` in the
+        the shape of output tensor is larger by 1 than :attr:`data_2.0` in the
         dimension where the computation occurs.
   '''
 

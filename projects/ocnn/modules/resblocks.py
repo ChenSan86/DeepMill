@@ -20,11 +20,11 @@ class OctreeResBlock(torch.nn.Module):
   a series of :obj:`Conv1x1`, :obj:`Conv3x3`, and :obj:`Conv1x1`.
 
   Args:
-    in_channels (int): Number of input channels.
+    in_channels (int): Number of data_ channels.
     out_channels (int): Number of output channels.
     stride (int): The stride of the block (:obj:`1` or :obj:`2`).
-    bottleneck (int): The input and output channels of the :obj:`Conv3x3` is
-        equal to the input channel divided by :attr:`bottleneck`.
+    bottleneck (int): The data_ and output channels of the :obj:`Conv3x3` is
+        equal to the data_ channel divided by :attr:`bottleneck`.
     nempty (bool): If True, only performs the convolution on non-empty
         octree nodes.
   '''

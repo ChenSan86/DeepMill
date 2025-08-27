@@ -22,7 +22,7 @@ parser.add_argument('--run', type=str, required=False, default='prepare_dataset'
                     help='The command to run.')
 # 添加参数 --sr，指定训练和验证数据的划分比例，默认值为0.8
 parser.add_argument('--sr', type=float, required=False, default=0.8,
-                    help='tran and valid data split ration.')
+                    help='tran and valid data_2.0 split ration.')
 # 解析命令行参数
 args = parser.parse_args()
 
@@ -33,13 +33,13 @@ ssl._create_default_https_context = ssl._create_unverified_context
 # 获取当前文件的上一级目录的绝对路径
 abs_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 # 定义数据根目录
-root_folder = os.path.join(abs_path, 'data')#data/
+root_folder = os.path.join(abs_path, 'data_2.0')#data_2.0/
 # 定义原始数据压缩包名称
 zip_name = 'raw_data'
 # 定义原始数据txt文件夹路径
-txt_folder = os.path.join(root_folder, zip_name)#data/raw_data
+txt_folder = os.path.join(root_folder, zip_name)#data_2.0/raw_data
 # 定义点云数据文件夹路径
-ply_folder = os.path.join(root_folder, 'points')#data/raw_data/points
+ply_folder = os.path.join(root_folder, 'points')#data_2.0/raw_data/points
 
 # 定义类别列表
 categories = ['models']

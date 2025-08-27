@@ -12,13 +12,13 @@ from ocnn.octree import Octree
 
 def octree2voxel(data: torch.Tensor, octree: Octree, depth: int,
                  nempty: bool = False):
-  r''' Converts the input feature to the full-voxel-based representation.
+  r''' Converts the data_ feature to the full-voxel-based representation.
 
   Args:
-    data (torch.Tensor): The input feature.
+    data (torch.Tensor): The data_ feature.
     octree (Octree): The corresponding octree.
     depth (int): The depth of current octree.
-    nempty (bool): If True, :attr:`data` only contains the features of non-empty
+    nempty (bool): If True, :attr:`data_2.0` only contains the features of non-empty
         octree nodes.
   '''
 
@@ -32,7 +32,7 @@ def octree2voxel(data: torch.Tensor, octree: Octree, depth: int,
 
 
 class Octree2Voxel(torch.nn.Module):
-  r''' Converts the input feature to the full-voxel-based representation.
+  r''' Converts the data_ feature to the full-voxel-based representation.
 
   Please refer to :func:`octree2voxel` for details.
   '''

@@ -16,11 +16,11 @@ class AutoEncoder(torch.nn.Module):
   r''' Octree-based AutoEncoder for shape encoding and decoding.
 
   Args:
-    channel_in (int): The channel of the input signal.
+    channel_in (int): The channel of the data_ signal.
     channel_out (int): The channel of the output signal.
     depth (int): The depth of the octree.
     full_depth (int): The full depth of the octree.
-    feature (str): The feature type of the input signal. For details of this
+    feature (str): The feature type of the data_ signal. For details of this
         argument, please refer to :class:`ocnn.modules.InputFeature`.
   '''
 
