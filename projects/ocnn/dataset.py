@@ -6,7 +6,7 @@
 # --------------------------------------------------------
 
 import torch
-
+import numpy as np
 import ocnn
 from ocnn.octree import Octree, Points
 
@@ -138,6 +138,12 @@ class CollateBatch:
   def __call__(self, batch: list):
     assert type(batch) == list
 
+    '''
+    [{'points': <ocnn.octree.points.Points object at 0x0000020AC2F02D70>, 'inbox_mask': tensor([True, True, True,  ..., True, True, True]), 'octree': <ocnn.octree.octree.Octree object at 0x0000020AC317C8E0>, 'label': 0, 'filename': 'models/00180129_2a7cd9e552c6cea9a96c9b19_trimesh_005_collision_detection.ply', 'labels': array([ 0.804703, -0.563992, -0.18538 , -0.563992, -0.628736, -0.535354],
+      dtype=float32), 'tool_params': ['-0.185380', '-0.563992', '-0.628736', '-0.535354']}, {'points': <ocnn.octree.points.Points object at 0x0000020AC2EC3D00>, 'inbox_mask': tensor([True, True, True,  ..., True, True, True]), 'octree': <ocnn.octree.octree.Octree object at 0x0000020A96A18E50>, 'label': 0, 'filename': 'models/00182021_3f32e263c256059ceb93f2cd_trimesh_000_collision_detection.ply', 'labels': array([ 0.97788 , -0.091459, -0.188112, -0.091459,  0.62185 , -0.777778],
+      dtype=float32), 'tool_params': ['-0.188112', '-0.091459', '0.621850', '-0.777778']}, {'points': <ocnn.octree.points.Points object at 0x0000020AC2F03FD0>, 'inbox_mask': tensor([True, True, True,  ..., True, True, True]), 'octree': <ocnn.octree.octree.Octree object at 0x0000020AC2F02F50>, 'label': 0, 'filename': 'models/00185383_c75913d57b38f133ce422607_trimesh_009_collision_detection.ply', 'labels': array([ 1.,  0.,  0.,  0.,  0., -1.], dtype=float32), 'tool_params': ['0.000000', '0.000000', '0.000000', '-1.000000']}, {'points': <ocnn.octree.points.Points object at 0x0000020AC2F038E0>, 'inbox_mask': tensor([True, True, True,  ..., True, True, True]), 'octree': <ocnn.octree.octree.Octree object at 0x0000020AC2F035B0>, 'label': 0, 'filename': 'models/00182517_88c54095b2b852ca2a297d19_trimesh_001_collision_detection.ply', 'labels': array([ 1.,  0.,  0.,  0.,  0., -1.], dtype=float32), 'tool_params': ['0.000000', '0.000000', '0.000000', '-1.000000']}, {'points': <ocnn.octree.points.Points object at 0x0000020AC2F038B0>, 'inbox_mask': tensor([False, False, False,  ...,  True,  True,  True]), 'octree': <ocnn.octree.octree.Octree object at 0x0000020AC2F03460>, 'label': 0, 'filename': 'models/00184740_58d40608c3b3d0f9b3eeec2e_trimesh_003_collision_detection.ply', 'labels': array([ 0.986939, -0.029145, -0.158438, -0.029145,  0.934967, -0.353535],
+      dtype=float32), 'tool_params': ['-0.158438', '-0.029145', '0.934967', '-0.353535']}, {'points': <ocnn.octree.points.Points object at 0x0000020AC2F03670>, 'inbox_mask': tensor([True, True, True,  ..., True, True, True]), 'octree': <ocnn.octree.octree.Octree object at 0x0000020AC2F02BF0>, 'label': 0, 'filename': 'models/00183359_0d8a3d7f49a277dc4b41a15a_trimesh_001_collision_detection.ply', 'labels': array([1., 0., 0., 0., 0., 1.], dtype=float32), 'tool_params': ['0.000000', '0.000000', '0.000000', '1.000000']}, {'points': <ocnn.octree.points.Points object at 0x0000020AC2F03EE0>, 'inbox_mask': tensor([ True,  True,  True,  ...,  True,  True, False]), 'octree': <ocnn.octree.octree.Octree object at 0x0000020AC317C580>, 'label': 0, 'filename': 'models/00182901_576b71a8e4b0cc2e7f45caf5_trimesh_003_collision_detection.ply', 'labels': array([ 1.,  0.,  0.,  0.,  0., -1.], dtype=float32), 'tool_params': ['0.000000', '0.000000', '0.000000', '-1.000000']}, {'points': <ocnn.octree.points.Points object at 0x0000020AC317CBB0>, 'inbox_mask': tensor([True, True, True,  ..., True, True, True]), 'octree': <ocnn.octree.octree.Octree object at 0x0000020AC317D8D0>, 'label': 0, 'filename': 'models/00181071_2c803360484b532e34aed9a1_trimesh_001_collision_detection.ply', 'labels': array([-0.394907,  0.347998, -0.850262,  0.347998,  0.913182,  0.212121],
+      dtype=float32), 'tool_params': ['-0.850262', '0.347998', '0.913182', '0.212121']}]'''
     outputs = {}
     for key in batch[0].keys():
       outputs[key] = [b[key] for b in batch]
@@ -154,42 +160,20 @@ class CollateBatch:
         outputs[key] = ocnn.octree.merge_points(outputs[key])
 
       # Convert the labels to a Tensor
-      if 'label' in key:
+      if 'label' == key:
         outputs['label'] = torch.tensor(outputs[key])
 
       if 'label_2' in key:
         outputs['label_2'] = torch.tensor(outputs[key])
 
-    # print("\n"*10)
-    # print(outputs)
-    # print("\n"*10)
+
+      if  'labels' == key:
+        arr = np.asarray(outputs[key])
+        outputs['labels'] = torch.from_numpy(arr).to(torch.float32)
+
+
+
 
     return outputs
-'''{'points': <ocnn.octree.points.Points object at 0x00000158DA2AD750>,
- 'inbox_mask': [tensor([True, True, True,  ..., True, True, True]),
- tensor([False, False, False,  ...,  True,  True,  True]),
- tensor([True, True, True,  ..., True, True, True]),
- tensor([True, True, True,   ..., True, True, True]), 
-tensor([True, True, True,  ..., True, True, True]), 
-  tensor([True, True, True,  ..., True, True, True]), 
-  tensor([True, True, True,  ..., True, True, True]), 
-  tensor([True, True, True,  ..., True, True, True])], 
-  'octree': <ocnn.octree.octree.Octre
-e object at 0x00000158DA2AE080>, 
-'label': tensor([0, 0, 0, 0, 0, 0, 0, 0]),
- 'filename': ['models/00185844_14f3d01d62b5237f728896c5_trimesh_076_collision_detection.ply', 
- 'models/00180686_ea6367c8a224ad6fdf4fb34b_trimesh_013_collision_detection.ply', 
- 'models/00186429_9d497b2fa29b87491f08ef85_trimesh_003_collision_detection.ply', 
-'models/00186448_19a4b1099ec6cf2b78a62985_trimesh_000_collision_detection.ply', 
-'models/00180129_2a7cd9e552c6cea9a96c9b19_trimesh_005_collision_detection.ply', 
-'models/00186294_57720c19e4b0b4b404503992_trimesh_001_collision_detection.ply',
- 'models/00186536_35fd82bd6c05f33776aa5852_trimesh_021_collision_detection.ply',
-  'models/00183156_e4dfafb620a34b2168d7e04a_trimesh_001_collision_detection.ply'], 
-  'tool_params': [['1.859530', '4.404930', '94.149500', '5.689460'],
-   ['1.528950', '5.992420', '60.097500', '5.337980'], 
-   ['1.022710', '8.981910', '54.232700', '2.376390'], 
-   ['1.908020', '4.877120', '19.339000', '0.614663'], 
-   ['1.969010', '4.070060', '96.976400', '0.958661'], 
-   ['1.838680', '6.335170', '52.698200', '9.206030'], 
-   ['1.295500', '0.211525', '42.697500', '0.987759'], 
-['1.143460', '10.010300', '53.347800', '4.771190']]}'''
+'''{'points': <ocnn.octree.points.Points object at 0x00000276CD562470>, 'inbox_mask': [tensor([True, True, True,  ..., True, True, True])], 'octree': <ocnn.octree.octree.Octree object at 0x00000276CD562530>, 'label': tensor([0]), 'filename': ['models/00188527_4c51c8d28bbc8e3e63b05da1_trimesh_035_collision_detection.ply'], 'tool_params': [['0.387790', '0.382705', '0.092861', '-0.919192']]}
+'''

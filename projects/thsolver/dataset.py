@@ -44,7 +44,14 @@ class Dataset(torch.utils.data.Dataset):
     output = self.transform(sample, idx)  # 数据增强和octree构建
     output['label'] = self.labels[idx]  # 添加标签
     output['filename'] = self.filenames[idx]  # 添加文件名
+    filename = self.filenames[idx]
+    basename = os.path.basename(filename)
+
+    # 去掉后缀和_collision_detection
+    model_name = basename.replace('_collision_detection.ply', '')
+    label = read_six_dim_vector(model_name)
     # 这里确保刀具参数添加到输出中
+    output['labels'] = np.array(label).astype(np.float32)
     output['tool_params'] = self.tool_params[idx]  # 假设在加载数据时已经填充
     return output  # 返回样本字典
 
@@ -72,5 +79,30 @@ class Dataset(torch.utils.data.Dataset):
     if self.take > num or self.take < 1:
       self.take = num  # 修正take参数
     result = (filenames[:self.take], labels[:self.take], tool_params[:self.take])
-
     return result  # 返回指定数量的文件名、标签和刀具参数
+
+def read_six_dim_vector(model_name, filelist_dir='data_2.0/filelist'):
+    """
+    根据模型名称，查找文件并读取六维向量
+    :param model_name: 模型文件名（如 models/xxx.ply）
+    :param filelist_dir: 文件列表目录
+    :return: 六维向量（list[float]），未找到则返回None
+    """
+    file_paths = [
+        os.path.join(filelist_dir, 'models_test.txt'),
+        os.path.join(filelist_dir, 'models_train_val.txt')
+    ]
+    for file_path in file_paths:
+        if not os.path.exists(file_path):
+            continue
+        with open(file_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                if model_name in line:
+                    parts = line.strip().split()
+                    # 最后六个浮点数
+                    try:
+                        vector = [float(x) for x in parts[-6:]]
+                        return vector
+                    except Exception:
+                        pass
+    return None

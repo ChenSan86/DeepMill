@@ -54,6 +54,12 @@ class SegSolver(Solver):  # 继承自Solver，分割任务专用训练器
         return data  # 返回特征
 
     def process_batch(self, batch, flags):  # 处理一个batch的数据
+        # print("===============================batch info===================================")
+        # print(f"Batch keys: {batch.keys()}")
+        # print(f"Number of filenames: {len(batch['filename'])}")
+        # print("===============================batch info end===================================")
+
+
         def points2octree(points):  # 点云转八叉树
             octree = ocnn.octree.Octree(flags.depth, flags.full_depth)  # 创建八叉树对象
             octree.build_octree(points)  # 构建八叉树
@@ -77,6 +83,7 @@ class SegSolver(Solver):  # 继承自Solver，分割任务专用训练器
 
 
     def model_forward(self, batch):  # 模型前向传播
+
         octree, points = batch['octree'], batch['points']  # 获取octree和points
         data = self.get_input_feature(octree)  # 获取输入特征
         query_pts = torch.cat([points.points, points.batch_id], dim=1)  # 拼接点云坐标和batch_id
@@ -89,11 +96,10 @@ class SegSolver(Solver):  # 继承自Solver，分割任务专用训练器
         # print(f"Processed tool_params: {tool_params}, type: {type(tool_params)}, shape: {tool_params.shape}")
 
         # 将刀具参数传递给模型
-        logit_1,logit_2 = self.model.forward(data, octree, octree.depth, query_pts, tool_params)  # 传递刀具参数
-        labels = points.labels.squeeze(1)  # 获取标签
-        label_mask = labels > self.FLAGS.LOSS.mask  # 过滤标签
-        labels_2 = points.labels_2.squeeze(1)  # 获取第二组标签
-        return logit_1[label_mask], logit_2[label_mask], labels[label_mask], labels_2[label_mask]  # 返回有效的logit和标签
+        logit= self.model.forward(data, octree, octree.depth, query_pts, tool_params)  # 传递刀具参数
+        labels = torch.tensor(batch['labels'], dtype=torch.float32).cuda()
+
+        return logit,labels
 
 
     def visualization(self, points, logit, labels,  red_folder,gt_folder):  # 可视化函数
@@ -140,28 +146,30 @@ class SegSolver(Solver):  # 继承自Solver，分割任务专用训练器
                     # 遍历该batch中的每个点并写入到.obj文件
                     obj_file.write(f"v {batch_points.points[0]} {batch_points.points[1]} {batch_points.points[2]}\n")  # 写入点坐标
 
+    def train_step(self, batch):
+        batch = self.process_batch(batch, self.FLAGS.DATA.train)
 
-    def train_step(self, batch):  # 训练步骤
-        batch = self.process_batch(batch, self.FLAGS.DATA.train)  # 处理训练数据
-        logit_1,logit_2, label, label_2 = self.model_forward(batch)  # 前向传播
-        #TODO loss使用6->3*3 后使用L2矩阵差平方和（Frobenius norm 的平方）
-        loss_1 = self.loss_function(logit_1, label)  # 计算损失
-        loss_2 = self.loss_function(logit_2, label_2)  # 计算损失
-        loss = (loss_1 + loss_2)/2  # 平均损失
-        accu_1 = self.accuracy(logit_1, label)  # 计算准确率
-        accu_2 = self.accuracy(logit_2, label_2)  # 计算准确率
-        accu = (accu_1 + accu_2)/2  # 平均准确率
+        logit, label = self.model_forward(batch)
+        loss = self.loss_function(logit, label)
 
-        pred_1 = logit_1.argmax(dim=-1)  # 假设 logit_1 是 logits 形式，需要用 argmax 选取预测类别
-        pred_2 = logit_2.argmax(dim=-1)
-        # 这里使用 f1_score 函数，假设 label 和 label_2 都是 0 和 1 的整数标签
-        #TODO 测地距离（geodesic error） 衡量旋转误差 ；平均误差、最大误差、标准差，并画出误差分布百分位曲线。
-        f1_score_1 = f1_score(label.cpu().numpy(), pred_1.cpu().numpy(), average='binary')  # 计算F1分数
-        f1_score_2 = f1_score(label_2.cpu().numpy(), pred_2.cpu().numpy(), average='binary')  # 计算F1分数
-        f1_score_avg = (f1_score_1 + f1_score_2) / 2  # 平均F1分数
+        # 原先 mean/max/std 是 float
+        mean = self.mean(logit, label)
+        maxe = self.max(logit, label)
+        stdv = self.std_score(logit, label)
 
-        return {'train/loss': loss, 'train/accu': accu, 'train/accu_red': accu_1, 'train/accu_green': accu_2,
-                'train/f1_red': torch.tensor(f1_score_1, dtype=torch.float32).cuda(), 'train/f1_green': torch.tensor(f1_score_2, dtype=torch.float32).cuda(), 'train/f1_avg': torch.tensor(f1_score_avg, dtype=torch.float32).cuda()}
+        # 改成张量（放到与 loss 相同的 device）
+        device = loss.device
+        mean_t = torch.tensor(mean, dtype=torch.float32, device=device)
+        maxe_t = torch.tensor(maxe, dtype=torch.float32, device=device)
+        stdv_t = torch.tensor(stdv, dtype=torch.float32, device=device)
+
+        return {
+            'train/loss': loss,
+            'train/mean_error': mean_t,
+            'train/max_error': maxe_t,
+            'train/standard_deviation': stdv_t,
+        }
+
         # return {'train/loss': loss, 'train/accu': accu,'train/accu_red': accu_1,'train/accu_green': accu_2,
         # 'train/f1_red': f1_score_1,'train/f1_green': f1_score_2,'train/f1_avg': f1_score_avg}
 
@@ -170,7 +178,7 @@ class SegSolver(Solver):  # 继承自Solver，分割任务专用训练器
     def test_step(self, batch):  # 测试步骤
         batch = self.process_batch(batch, self.FLAGS.DATA.test)  # 处理测试数据
         with torch.no_grad():
-            logit_1,logit_2, label, label_2 = self.model_forward(batch)  # 前向传播
+            logit, label = self.model_forward(batch)  # 前向传播
         # self.visualization(batch['points'], logit, label, ".\\data_2.0\\vis\\"+batch['filename'][0][:-4]+".obj") #FC:目前可视化只支持test的batch size=1
         loss_1 = self.loss_function(logit_1, label)  # 计算损失
         loss_2 = self.loss_function(logit_2, label_2)  # 计算损失
@@ -275,18 +283,72 @@ class SegSolver(Solver):  # 继承自Solver，分割任务专用训练器
         avg_tracker.update({'test/mIoU_part': torch.Tensor([iou_part])})  # 更新Tracker
         tqdm.write('=> Epoch: %d, test/mIoU_part: %f' % (epoch, iou_part))  # 打印信息
 
+    # def loss_function(self, logit, label):  # 损失函数
+    #     """
+    #     计算交叉熵损失函数。
+    #     参数：
+    #         logit: 【n,6】
+    #         label: [n,6]
+    #     返回：
+    #         loss: 先将label和logit中的六维表示都转化成旋转矩阵，再做两个选转矩阵的Frobenius norm平方和
+    #     """
+    #     criterion = torch.nn.CrossEntropyLoss()  # 创建交叉熵损失函数
+    #     loss = criterion(logit, label.long())  # 计算损失，标签需为long类型
+    #     return loss  # 返回损失
     def loss_function(self, logit, label):  # 损失函数
         """
-        计算交叉熵损失函数。
+        计算旋转矩阵的Frobenius范数平方和损失。
         参数：
-            logit: 网络输出的未归一化分数（shape: [N, num_class]）
-            label: 真实标签（shape: [N]），需为整数类型
+            logit: [n,6]，模型预测的六维表示
+            label: [n,6]，真实标签的六维表示
         返回：
-            loss: 标量，交叉熵损失
+            loss: 标量，表示损失值
         """
-        criterion = torch.nn.CrossEntropyLoss()  # 创建交叉熵损失函数
-        loss = criterion(logit, label.long())  # 计算损失，标签需为long类型
-        return loss  # 返回损失
+        # 检查 logit 和 label 的格式
+        #
+        # print("===============================logit and label info===================================")
+        # print(f"logit shape: {logit.shape}, dtype: {logit.dtype}")
+        # print(f"label shape: {label.shape}, dtype: {label.dtype}")
+        #
+        # # 打印部分数据内容
+        # print(f"logit sample: {logit[:5]}")
+        # print(f"label sample: {label[:5]}")
+
+        def six_dim_to_rotation_matrix(six_dim_vector):
+            """
+            将六维向量还原为旋转矩阵。
+            参数:
+                six_dim_vector: (N, 6) 的张量，表示六维向量
+            返回:
+                rotation_matrix: (N, 3, 3) 的张量，表示旋转矩阵
+            """
+            x = six_dim_vector[:, 0:3]  # 第一列向量
+            y = six_dim_vector[:, 3:6]  # 第二列向量
+
+            # 对 x 进行归一化
+            x = torch.nn.functional.normalize(x, dim=1)
+
+            # 使 y 与 x 正交化
+            y = y - torch.sum(x * y, dim=1, keepdim=True) * x
+            y = torch.nn.functional.normalize(y, dim=1)
+
+            # 计算 z = x × y
+            z = torch.cross(x, y, dim=1)
+
+            # 拼接成旋转矩阵
+            rotation_matrix = torch.stack([x, y, z], dim=-1)  # (N, 3, 3)
+            return rotation_matrix
+
+        # 将 logit 和 label 转换为旋转矩阵
+        logit_matrix = six_dim_to_rotation_matrix(logit)
+        label_matrix = six_dim_to_rotation_matrix(label)
+
+        # 计算两个旋转矩阵的差
+        diff = logit_matrix - label_matrix
+
+        # 计算 Frobenius 范数的平方和
+        loss = torch.sum(diff ** 2) / diff.size(0)
+        return loss
 
     def accuracy(self, logit, label):  # 准确率计算
         """
@@ -300,6 +362,104 @@ class SegSolver(Solver):  # 继承自Solver，分割任务专用训练器
         pred = logit.argmax(dim=1)  # 取最大分数作为预测类别
         accu = pred.eq(label).float().mean()  # 计算预测与真实标签相��的比例
         return accu  # 返回准确率
+
+    def mean(self, logit, label):
+        """
+        计算预测值和真实值之间的平均误差。
+        参数：
+            logit: 网络输出的未归一化分数（shape: [N, num_class]）
+            label: 真实标签（shape: [N, num_class]）
+        返回：
+            mean_error: 标量，表示平均误差
+        """
+
+        # 将 logit 和 label 转换为旋转矩阵
+        def six_dim_to_rotation_matrix(six_dim_vector):
+            x = six_dim_vector[:, 0:3]
+            y = six_dim_vector[:, 3:6]
+            x = torch.nn.functional.normalize(x, dim=1)
+            y = y - torch.sum(x * y, dim=1, keepdim=True) * x
+            y = torch.nn.functional.normalize(y, dim=1)
+            z = torch.cross(x, y, dim=1)
+            rotation_matrix = torch.stack([x, y, z], dim=-1)
+            return rotation_matrix
+
+        logit_matrix = six_dim_to_rotation_matrix(logit)
+        label_matrix = six_dim_to_rotation_matrix(label)
+
+        # 计算角度误差
+        R_diff = torch.matmul(logit_matrix.transpose(1, 2), label_matrix)
+        trace = torch.diagonal(R_diff, dim1=-2, dim2=-1).sum(-1)
+        angle_error = torch.acos(torch.clamp((trace - 1) / 2, -1.0, 1.0))
+
+        # 计算平均误差
+        mean_error = angle_error.mean().item()
+        return mean_error
+    def max(self, logit, label):
+        """
+        计算预测值和真实值之间的最大误差。
+        参数：
+            logit: 网络输出的未归一化分数（shape: [N, num_class]）
+            label: 真实标签（shape: [N, num_class]）
+        返回：
+            max_error: 标量，表示最大误差
+        """
+
+        # 将 logit 和 label 转换为旋转矩阵
+        def six_dim_to_rotation_matrix(six_dim_vector):
+            x = six_dim_vector[:, 0:3]
+            y = six_dim_vector[:, 3:6]
+            x = torch.nn.functional.normalize(x, dim=1)
+            y = y - torch.sum(x * y, dim=1, keepdim=True) * x
+            y = torch.nn.functional.normalize(y, dim=1)
+            z = torch.cross(x, y, dim=1)
+            rotation_matrix = torch.stack([x, y, z], dim=-1)
+            return rotation_matrix
+
+        logit_matrix = six_dim_to_rotation_matrix(logit)
+        label_matrix = six_dim_to_rotation_matrix(label)
+
+        # 计算角度误差
+        R_diff = torch.matmul(logit_matrix.transpose(1, 2), label_matrix)
+        trace = torch.diagonal(R_diff, dim1=-2, dim2=-1).sum(-1)
+        angle_error = torch.acos(torch.clamp((trace - 1) / 2, -1.0, 1.0))
+
+        # 计算最大误差
+        max_error = angle_error.max().item()
+        return max_error
+
+    def std_score(self, logit, label):
+        """
+        计算预测值和真实值之间的角度误差的标准差。
+        参数：
+            logit: 网络输出的未归一化分数（shape: [N, num_class]）
+            label: 真实标签（shape: [N, num_class]）
+        返回：
+            std_error: 标量，表示角度误差的标准差
+        """
+
+        # 将 logit 和 label 转换为旋转矩阵
+        def six_dim_to_rotation_matrix(six_dim_vector):
+            x = six_dim_vector[:, 0:3]
+            y = six_dim_vector[:, 3:6]
+            x = torch.nn.functional.normalize(x, dim=1)
+            y = y - torch.sum(x * y, dim=1, keepdim=True) * x
+            y = torch.nn.functional.normalize(y, dim=1)
+            z = torch.cross(x, y, dim=1)
+            rotation_matrix = torch.stack([x, y, z], dim=-1)
+            return rotation_matrix
+
+        logit_matrix = six_dim_to_rotation_matrix(logit)
+        label_matrix = six_dim_to_rotation_matrix(label)
+
+        # 计算角度误差
+        R_diff = torch.matmul(logit_matrix.transpose(1, 2), label_matrix)
+        trace = torch.diagonal(R_diff, dim1=-2, dim2=-1).sum(-1)
+        angle_error = torch.acos(torch.clamp((trace - 1) / 2, -1.0, 1.0))
+
+        # 计算标准差
+        std_error = angle_error.std().item()
+        return std_error
 
     def IoU_per_shape(self, logit, label, class_num):  # 计算每个形状的IoU
         """

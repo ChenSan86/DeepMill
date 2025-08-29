@@ -49,12 +49,17 @@ class UNet(torch.nn.Module):
 
         # header
         self.octree_interp = ocnn.nn.OctreeInterp(interp, nempty)
-        self.header = torch.nn.Sequential(
-            ocnn.modules.Conv1x1BnRelu(self.decoder_channel[-1], self.head_channel),
-            ocnn.modules.Conv1x1(self.head_channel, self.out_channels, use_bias=True))
-        self.header_2 = torch.nn.Sequential(
-            ocnn.modules.Conv1x1BnRelu(self.decoder_channel[-1], self.head_channel),
-            ocnn.modules.Conv1x1(self.head_channel, self.out_channels, use_bias=True))
+        self.pose_head = torch.nn.Sequential(
+            torch.nn.Linear(self.decoder_channel[-1], 128),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.BatchNorm1d(128),
+            torch.nn.Dropout(0.3),
+            torch.nn.Linear(128, 6)
+        )
+
+        # self.header_2 = torch.nn.Sequential(
+        #     ocnn.modules.Conv1x1BnRelu(self.decoder_channel[-1], self.head_channel),
+        #     ocnn.modules.Conv1x1(self.head_channel, self.out_channels, use_bias=True))
 
 
         self.fc_module_1 = torch.nn.Sequential(
@@ -182,6 +187,17 @@ class UNet(torch.nn.Module):
         feature = self.octree_interp(deconv, octree, interp_depth, query_pts)
 
         # 两个分割头，分别输出不同类别的分割结果
-        logits_1 = self.header(feature)
-        logits_2 = self.header_2(feature)
-        return logits_1, logits_2
+        #logits = self.header(feature)
+        # logits_2 = self.header_2(feature)
+        batch_id = query_pts[:, 3].long()  # [N_pts]
+        B = tool_params.size(0)  # batch size
+        C = feature.size(1)
+        # 按 batch 累加并做均值
+        sum_feat = torch.zeros(B, C, device=feature.device, dtype=feature.dtype)
+        sum_feat.index_add_(0, batch_id, feature)  # 对应 batch_id 求和
+        cnt = torch.bincount(batch_id, minlength=B).clamp_min(1).float().to(feature.device)
+        global_feat = sum_feat / cnt.unsqueeze(1)  # [B, C]
+
+        # MLP header 输出 6D
+        sixd = self.pose_head(global_feat)
+        return sixd
